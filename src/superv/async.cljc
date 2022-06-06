@@ -98,19 +98,15 @@
     x))
 
 #?(:clj
-   (defmacro native-image-build? []
-     (try
-       (and (Class/forName "org.graalvm.nativeimage.ImageInfo")
-            #_(eval '(org.graalvm.nativeimage.ImageInfo/inImageBuildtimeCode)))
-       (catch Exception _
-         false))))
+   (defn graal-native? []
+     (= "true" (System/getProperty "com.oracle.graalvm.isaot"))))
 
 ;; a simple global instance, will probably be removed
 (def S
   (try
     ;; We cannot run the simple-supervisor thread in a static context inside
     ;; native image.
-    #?(:clj (if (native-image-build?)
+    #?(:clj (if (graal-native?)
               (dummy-supervisor)
               (simple-supervisor))
        :cljs (simple-supervisor))
